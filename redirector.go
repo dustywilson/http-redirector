@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var hostValidMatch = regexp.MustCompile("^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$")
@@ -77,12 +78,16 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 				if parts[0][2] == "" {
 					parts[0][2] = "99999"
 				}
-				if parts[0][3] == "" {
-					parts[0][3] = "^https?://[^/]+/?([^\\?]*)\\?(.*)$"
-				}
+				//	if parts[0][3] == "" {
+				//		parts[0][3] = ""
+				//	}
 				record.Order, _ = strconv.Atoi(parts[0][2])
 				record.Match = parts[0][3]
 				record.Target = parts[0][4]
+				record.Target = strings.Replace(record.Target, "${SCHEME}", r.URL.Scheme, -1)
+				record.Target = strings.Replace(record.Target, "${HOST}", r.URL.Host, -1)
+				record.Target = strings.Replace(record.Target, "${PATH}", r.URL.Path, -1)
+				record.Target = strings.Replace(record.Target, "${QUERY}", r.URL.RawQuery, -1)
 				records[i] = record
 				i++
 			}
